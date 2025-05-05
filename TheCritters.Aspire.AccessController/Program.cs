@@ -6,6 +6,8 @@ using Wolverine;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.AddFilter("Npgsql.Command", LogLevel.Warning);
+builder.Logging.AddFilter("Npgsql", LogLevel.Warning);
 // Add service defaults from Aspire
 builder.AddServiceDefaults();
 

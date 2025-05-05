@@ -93,7 +93,7 @@
     {
         try
         {
-            var result = await MessageBus.InvokeAsync<RegisterCritterCommand>(newCritter);
+            await MessageBus.InvokeAsync(newCritter);
 
             Snackbar.Add("Critter registered successfully!", Severity.Success);
             newCritter = new("", "");

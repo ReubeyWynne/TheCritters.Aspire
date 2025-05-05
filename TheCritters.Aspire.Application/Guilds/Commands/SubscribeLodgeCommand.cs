@@ -6,27 +6,26 @@ using TheCritters.Aspire.Infrastructure.Projections;
 using System.Runtime.CompilerServices;
 using static TheCritters.Aspire.Domain.Aggregates.Guild;
 
-namespace TheCritters.Aspire.Application.Critters.Commands;
+namespace TheCritters.Aspire.Application.Guilds.Commands;
 
-public record UnsubscribeLodgeCommand(
+public record SubscribeLodgeCommand(
     Guid GuildId,
     Guid LodgeId);
 
-public static class UnsubscribeLodgeAggregateHandler
+public static class JoinLodgeAccessAggregateHandler
 {
     public static async IAsyncEnumerable<GrantAccessCommand> Handle(
-        UnsubscribeLodgeCommand command,
+        SubscribeLodgeCommand command,
         IEventStream<Guild> stream,
         IDocumentSession session,
         [EnumeratorCancellation] CancellationToken ct)
     {
-        stream.AppendOne(new GuildLeftLodge(command.GuildId, command.LodgeId, DateTime.UtcNow));
+        stream.AppendOne(new GuildJoinedLodge(command.GuildId, command.LodgeId, DateTime.UtcNow));
 
         var guildMembers = await session
             .Query<CritterDetails>()
             .Where(c => c.GuildIds.Contains(command.GuildId))
             .ToListAsync(ct);
-
 
         foreach (var critter in guildMembers)
         {

@@ -84,13 +84,8 @@
     {
         try
         {
-            var result = await MessageBus.InvokeAsync<CreateGuildCommand>(newGuild);
-
-            if(result == null)
-            {
-                Snackbar.Add($"Error creating guild", Severity.Error);
-                return;
-            }
+            await MessageBus.InvokeAsync(newGuild);
+          
             Snackbar.Add("Guild created successfully!", Severity.Success);
             newGuild = new("", "");
             await form.ResetAsync();

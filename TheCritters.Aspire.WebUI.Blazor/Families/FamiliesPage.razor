@@ -84,11 +84,7 @@
         {
             var result = await MessageBus.InvokeAsync<EstablishFamilyCommand>(newLodge.ToCommand());
 
-            if(result == null)
-            {
-                Snackbar.Add($"Error creating Lodge", Severity.Error);
-                return;
-            }
+         
             Snackbar.Add("Lodge created successfully!", Severity.Success);
             newLodge = new("", "");
             await form.ResetAsync();

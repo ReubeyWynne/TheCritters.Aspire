@@ -15,12 +15,12 @@ public class Family
     public List<Guid> AssociatedLodges { get; private set; } = [];
     public List<Guid> FamilyIds { get; private set; } = [];
     public int FamilyCount { get; private set; }
-    public static Family Create(string name, string motto, DateTimeOffset establishedAt) => new()
+    public static Family Create(FamilyEstablished @event)
     {
-        Name = name,
-        Motto = motto,
-        EstablishedAt = establishedAt
-    };
+        var family = new Family();
+        family.Apply(@event);
+        return family;
+    }
     public void Apply(FamilyEstablished @event)
     {
         Name = @event.Name;

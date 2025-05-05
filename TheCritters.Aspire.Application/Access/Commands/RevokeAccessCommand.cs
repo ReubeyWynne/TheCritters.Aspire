@@ -4,7 +4,7 @@ using TheCritters.Aspire.Domain.Access;
 namespace TheCritters.Aspire.Application.Access.Commands;
 
 public record RevokeAccessCommand(
-    Guid AccessId,
+    Guid LodgeAccessId,
     string Reason);
 
 public static class RevokeAccessCommandAggregateHandler

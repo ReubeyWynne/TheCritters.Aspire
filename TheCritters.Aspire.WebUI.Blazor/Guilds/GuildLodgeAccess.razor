@@ -1,0 +1,177 @@
+﻿@page "/guild-lodge-access"
+@using TheCritters.Aspire.Application.Guilds.Commands
+@using TheCritters.Aspire.Infrastructure.Projections
+@using Wolverine
+@rendermode InteractiveServer
+@inject IMessageBus MessageBus
+@inject IQuerySession QuerySession
+@inject ISnackbar Snackbar
+<MudPopoverProvider/>
+
+<PageTitle>Guild Lodge Access</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Manage Guild Lodge Access</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="5">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Grant Lodge Access to Guild</MudText>
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudSelect T="Guid?" @bind-Value="selectedGuildId" Label="Select Guild" Required="true"
+                           RequiredError="Guild is required!" AnchorOrigin="Origin.BottomCenter"
+                           @onchange="UpdateAvailableLodges">
+                    @foreach (var guild in guilds)
+                    {
+                        <MudSelectItem Value="@((System.Guid?)guild.Id)">@guild.Name</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="Guid?" @bind-Value="selectedLodgeId" Label="Select Lodge" Required="true"
+                           RequiredError="Lodge is required!" AnchorOrigin="Origin.BottomCenter" Class="mt-3">
+                    @foreach (var lodge in availableLodges)
+                    {
+                        <MudSelectItem Value="@((System.Guid?)lodge.Id)">@lodge.Name (@lodge.Location)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4"
+                           OnClick="GrantAccess" Disabled="@(!success)">
+                    Grant Access
+                </MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="7">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Current Guild Lodge Access</MudText>
+            @if (loading)
+            {
+                <MudProgressCircular Indeterminate="true" />
+            }
+            else
+            {
+                @foreach (var guild in guilds)
+                {
+                    <MudCard Class="mb-3">
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle1"><strong>@guild.Name</strong></MudText>
+                            <MudText Typo="Typo.body2">@guild.Description</MudText>
+
+                            @if (!guild.AllowedLodges.Any())
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">No lodge access</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2">Has access to:</MudText>
+                                @foreach (var lodgeId in guild.AllowedLodges)
+                                {
+                                    var lodge = lodges.FirstOrDefault(l => l.Id == lodgeId);
+                                    if (lodge != null)
+                                    {
+                                        <MudChip T="int" Color="Color.Primary" Size="Size.Small"
+                                                 OnClose="() => RevokeAccess(guild.Id, lodgeId)">
+                                            @lodge.Name (@lodge.Location)
+                                        </MudChip>
+                                    }
+                                }
+                            }
+                        </MudCardContent>
+                    </MudCard>
+                }
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<GuildDetails> guilds = new();
+    private List<LodgeOccupancy> lodges = new();
+    private List<LodgeOccupancy> availableLodges = new();
+    private Guid? selectedGuildId;
+    private Guid? selectedLodgeId;
+    private bool loading = true;
+    private MudForm form = null!;
+    private bool success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        UpdateAvailableLodges();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            loading = true;
+            guilds = (await QuerySession.Query<GuildDetails>().ToListAsync()).ToList();
+            lodges = (await QuerySession.Query<LodgeOccupancy>().ToListAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void UpdateAvailableLodges()
+    {
+        if (selectedGuildId.HasValue)
+        {
+            var guild = guilds.FirstOrDefault(g => g.Id == selectedGuildId);
+            if (guild != null)
+            {
+                availableLodges = lodges.Where(l => !guild.AllowedLodges.Contains(l.Id)).ToList();
+            }
+        }
+        else
+        {
+            availableLodges = lodges;
+        }
+    }
+
+    private async Task GrantAccess()
+    {
+        if (!selectedGuildId.HasValue || !selectedLodgeId.HasValue)
+            return;
+
+        try
+        {
+            var command = new SubscribeLodgeCommand(selectedGuildId.Value, selectedLodgeId.Value);
+			await MessageBus.InvokeAsync(command);
+
+            Snackbar.Add("Successfully granted lodge access!", Severity.Success);
+            selectedGuildId = null;
+            selectedLodgeId = null;
+            await form.ResetAsync();
+            await LoadData();
+            UpdateAvailableLodges();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error granting access: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task RevokeAccess(Guid guildId, Guid lodgeId)
+    {
+        try
+        {
+            var command = new UnsubscribeLodgeCommand(guildId, lodgeId);
+            await MessageBus.InvokeAsync(command);
+
+            Snackbar.Add("Successfully revoked lodge access!", Severity.Success);
+            await LoadData();
+            UpdateAvailableLodges();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error revoking access: {ex.Message}", Severity.Error);
+        }
+    }
+}

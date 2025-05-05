@@ -15,12 +15,12 @@ public class Guild
     public List<Guid> AllowedLodges { get; private set; } = [];
     public DateTimeOffset CreatedAt { get; private set; }
 
-    public static Guild Create(string Name, string Description, DateTimeOffset CreatedAt) => new()
+    public static Guild Create(GuildCreated @event)
     {
-        Name = Name,
-        Description = Description,
-        CreatedAt = CreatedAt
-    };
+        var guild = new Guild();
+        guild.Apply(@event);
+        return guild;
+    }
 
     public void Apply(GuildCreated @event)
     {
