@@ -1,0 +1,105 @@
+﻿@page "/lodges"
+@using TheCritters.Aspire.Application.Lodges.Commands
+@using TheCritters.Aspire.Infrastructure.Projections
+@using Wolverine
+@rendermode InteractiveServer
+@inject IMessageBus MessageBus
+@inject IQuerySession QuerySession
+@inject ISnackbar Snackbar
+
+<PageTitle>Lodges</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Lodges</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Create New Lodge</MudText>
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudTextField T="string" @bind-Value="newLodge.Name" Label="Name" Required="true" RequiredError="Name is required!" />
+                <MudTextField T="string" @bind-Value="newLodge.Location" Label="Location" Required="true" RequiredError="Description is required!" Class="mt-3" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="CreateLodge" Disabled="@(!success)">Create</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Existing Lodges</MudText>
+            @if (loading)
+            {
+                <MudProgressCircular Indeterminate="true" />
+            }
+            else
+            {
+                <MudTable Items="@Lodges" Hover="true" Breakpoint="Breakpoint.Sm">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Location</MudTh>
+                        <MudTh>Capacity</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">@context.Name</MudTd>
+                        <MudTd DataLabel="Description">@context.Location</MudTd>
+                        <MudTd DataLabel="Allowed Lodges">@context.Capacity</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private CreateLodgeInput newLodge = new("", "");
+    private IReadOnlyList<LodgeOccupancy> Lodges = null!;
+    private bool loading = true;
+    private MudForm form = null!;
+    private bool success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadLodges();
+    }
+
+    private async Task LoadLodges()
+    {
+        try
+        {
+            loading = true;
+            Lodges = await QuerySession.Query<LodgeOccupancy>().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading Lodges: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task CreateLodge()
+    {
+        try
+        {
+            await MessageBus.InvokeAsync<CreateLodgeCommand>(newLodge.ToCommand());
+            
+            Snackbar.Add("Lodge created successfully!", Severity.Success);
+            newLodge = new("", "");
+            await form.ResetAsync();
+            await LoadLodges();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating Lodge: {ex.Message}", Severity.Error);
+        }
+    }
+
+    class CreateLodgeInput(string name, string location)
+    {
+        public string Name { get; set; } = name;
+        public string Location { get; set; } = location;
+
+        public CreateLodgeCommand ToCommand() => new(Name, Location, 10, DateTime.UtcNow);
+    }
+}

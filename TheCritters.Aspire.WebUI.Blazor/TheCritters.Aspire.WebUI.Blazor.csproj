@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="WolverineFx.Http.Marten" Version="3.13.0" />
+		<PackageReference Include="Scalar.AspNetCore" Version="2.2.5" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+		<PackageReference Include="MudBlazor" Version="8.6.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\TheCritters.Aspire.Application\TheCritters.Aspire.Application.csproj" />
+		<ProjectReference Include="..\TheCritters.Aspire.Domain\TheCritters.Aspire.Domain.csproj" />
+		<ProjectReference Include="..\TheCritters.Aspire.Infrastructure\TheCritters.Aspire.Infrastructure.csproj" />
+		<ProjectReference Include="..\TheCritters.Aspire.ServiceDefaults\TheCritters.Aspire.ServiceDefaults.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Access\" />
+	</ItemGroup>
+
+</Project>

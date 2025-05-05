@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<UserSecretsId>fe7e6633-b139-40a4-948d-6aa4e0fb21e1</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="WolverineFx.Http.Marten" Version="3.13.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\TheCritters.Aspire.Application\TheCritters.Aspire.Application.csproj" />
+		<ProjectReference Include="..\TheCritters.Aspire.ServiceDefaults\TheCritters.Aspire.ServiceDefaults.csproj" />
+	</ItemGroup>
+
+</Project>

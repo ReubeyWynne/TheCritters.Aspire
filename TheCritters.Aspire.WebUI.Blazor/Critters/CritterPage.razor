@@ -1,0 +1,108 @@
+﻿@page "/critters"
+@using TheCritters.Aspire.Application.Critters.Commands
+@using TheCritters.Aspire.Infrastructure.Projections
+@using Wolverine
+@rendermode InteractiveServer
+@inject IMessageBus MessageBus
+@inject IQuerySession QuerySession
+@inject ISnackbar Snackbar
+
+<PageTitle>Critters</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Critters</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Register New Critter</MudText>
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudTextField T="string" @bind-Value="newCritter.Name" Label="Name" Required="true" RequiredError="Name is required!" />
+                <MudTextField T="string" @bind-Value="newCritter.Species" Label="Species" Required="true" RequiredError="Species is required!" Class="mt-3" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="RegisterCritter" Disabled="@(!success)">Register</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Registered Critters</MudText>
+            @if (loading)
+            {
+                <MudProgressCircular Indeterminate="true" />
+            }
+            else
+            {
+                <MudTable Items="@critters" Hover="true" Breakpoint="Breakpoint.Sm">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Species</MudTh>
+                        <MudTh>Registered</MudTh>
+                        <MudTh>Active</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">@context.Name</MudTd>
+                        <MudTd DataLabel="Species">@context.Species</MudTd>
+                        <MudTd DataLabel="Registered">@context.RegisteredAt.ToString("g")</MudTd>
+                        <MudTd DataLabel="Active">
+                            @if (context.IsActive)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Check" Color="Color.Success" />
+                            }
+                            else
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Close" Color="Color.Error" />
+                            }
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private RegisterCritterCommand newCritter = new("", "");
+    private IReadOnlyList<CritterDetails> critters = null!;
+    private bool loading = true;
+    private MudForm form = null!;
+    private bool success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCritters();
+    }
+
+    private async Task LoadCritters()
+    {
+        try
+        {
+            loading = true;
+            critters = (await QuerySession.Query<CritterDetails>().ToListAsync());
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading critters: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task RegisterCritter()
+    {
+        try
+        {
+            var result = await MessageBus.InvokeAsync<RegisterCritterCommand>(newCritter);
+
+            Snackbar.Add("Critter registered successfully!", Severity.Success);
+            newCritter = new("", "");
+            await form.ResetAsync();
+            await LoadCritters();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error registering critter: {ex.Message}", Severity.Error);
+        }
+    }
+}

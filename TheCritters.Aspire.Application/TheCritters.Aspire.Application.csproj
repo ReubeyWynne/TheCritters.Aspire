@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="WolverineFx.Marten" Version="3.13.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\TheCritters.Aspire.Domain\TheCritters.Aspire.Domain.csproj" />
+	  <ProjectReference Include="..\TheCritters.Aspire.Domain\TheCritters.Aspire.Domain.csproj" />
+	  <ProjectReference Include="..\TheCritters.Aspire.Infrastructure\TheCritters.Aspire.Infrastructure.csproj" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/deploy/" />
+  <Folder Name="/deploy/aspire/" Id="0122577d-d46b-1069-386e-01c98f227279">
+    <Project Path="TheCritters.Aspire.AppHost/TheCritters.Aspire.AppHost.csproj" Id="ebd2f28f-d2f1-54b0-3dab-e4b9e83fa38e" />
+    <Project Path="TheCritters.Aspire.ServiceDefaults/TheCritters.Aspire.ServiceDefaults.csproj" Id="7f88eaf7-a265-8228-8b99-a6b12677a79b" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="TheCritters.Aspire.Application/TheCritters.Aspire.Application.csproj" Id="38f61057-a333-a46d-9a4e-4636df5ae35a" />
+    <Project Path="TheCritters.Aspire.Domain/TheCritters.Aspire.Domain.csproj" Id="06ee7910-d6d4-cf5d-75f0-91e71c4a50de" />
+    <Project Path="TheCritters.Aspire.Infrastructure/TheCritters.Aspire.Infrastructure.csproj" Id="5b33877a-f4e4-b1fe-6046-5d821d89ace1" />
+  </Folder>
+  <Folder Name="/src/clients/" Id="00b920e4-100f-d869-d8b1-04b3a2ed45da" />
+  <Folder Name="/src/clients/AccessController/" Id="9b1913b9-0806-0e19-45b5-c3a6f53190c2">
+    <Project Path="TheCritters.Aspire.AccessController/TheCritters.Aspire.AccessController.csproj" Id="a8dff16a-f77d-db65-e988-6493c49248da" />
+  </Folder>
+  <Folder Name="/src/clients/WebUI/" Id="7f844f5f-a240-15af-00c7-c135a05b067e">
+    <Project Path="TheCritters.Aspire.WebUI.Blazor/TheCritters.Aspire.WebUI.Blazor.csproj" Id="d379e0a6-6c40-b1fb-c36c-93b4a05cbd55" />
+  </Folder>
+</Solution>

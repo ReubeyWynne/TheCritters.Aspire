@@ -1,0 +1,110 @@
+﻿@page "/families"
+@using TheCritters.Aspire.Application.Family.Commands
+@using TheCritters.Aspire.Infrastructure.Projections
+@using Wolverine
+@rendermode InteractiveServer
+@inject IMessageBus MessageBus
+@inject IQuerySession QuerySession
+@inject ISnackbar Snackbar
+
+<PageTitle>Families</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Families</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Create New Lodge</MudText>
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudTextField T="string" @bind-Value="newLodge.Name" Label="Name" Required="true" RequiredError="Name is required!" />
+                <MudTextField T="string" @bind-Value="newLodge.Motto" Label="Location" Required="true" RequiredError="Description is required!" Class="mt-3" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="CreateLodge" Disabled="@(!success)">Create</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Existing Families</MudText>
+            @if (loading)
+            {
+                <MudProgressCircular Indeterminate="true" />
+            }
+            else
+            {
+                <MudTable Items="@Families" Hover="true" Breakpoint="Breakpoint.Sm">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Motto</MudTh>
+                        <MudTh>Lodge Memberships</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">@context.Name</MudTd>
+                        <MudTd DataLabel="Description">@context.Motto</MudTd>
+                        <MudTd DataLabel="Memberships">@context.Name</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private EstablishFamilyInput newLodge = new("", "");
+    private IReadOnlyList<FamilyDetails> Families = null!;
+    private bool loading = true;
+    private MudForm form = null!;
+    private bool success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFamilies();
+    }
+
+    private async Task LoadFamilies()
+    {
+        try
+        {
+            loading = true;
+            Families = await QuerySession.Query<FamilyDetails>().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading Families: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task CreateLodge()
+    {
+        try
+        {
+            var result = await MessageBus.InvokeAsync<EstablishFamilyCommand>(newLodge.ToCommand());
+
+            if(result == null)
+            {
+                Snackbar.Add($"Error creating Lodge", Severity.Error);
+                return;
+            }
+            Snackbar.Add("Lodge created successfully!", Severity.Success);
+            newLodge = new("", "");
+            await form.ResetAsync();
+            await LoadFamilies();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating Lodge: {ex.Message}", Severity.Error);
+        }
+    }
+
+    class EstablishFamilyInput(string name, string motto)
+    {
+        public string Name { get; set; } = name;
+        public string Motto { get; set; } = motto;
+
+        public EstablishFamilyCommand ToCommand() => new(Name, Motto, DateTime.UtcNow);
+    }
+}

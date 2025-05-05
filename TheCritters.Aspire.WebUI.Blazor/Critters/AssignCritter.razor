@@ -1,0 +1,172 @@
+﻿@page "/assign-guild"
+@using TheCritters.Aspire.Application.Critters.Commands
+@using TheCritters.Aspire.Domain.Aggregates
+@using TheCritters.Aspire.Infrastructure.Projections
+@using Wolverine
+@using static TheCritters.Aspire.Domain.Aggregates.Critter.Events
+@rendermode InteractiveServer
+@inject IMessageBus MessageBus
+@inject IQuerySession QuerySession
+@inject ISnackbar Snackbar
+
+<MudPopoverProvider />
+<PageTitle>Assign Critters to Guilds</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Assign Critters to Guilds</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="6">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Join Guild</MudText>
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudSelect T="Guid?" @bind-Value="selectedCritterId" Label="Select Critter" Required="true" RequiredError="Critter is required!" AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var critter in critters)
+                    {
+                        <MudSelectItem Value="@((System.Guid?)critter.Id)">@critter.Name (@critter.Species)</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudSelect T="Guid?" @bind-Value="selectedGuildId" Label="Select Guild" Required="true" RequiredError="Guild is required!" AnchorOrigin="Origin.BottomCenter" Class="mt-3">
+                    @foreach (var guild in availableGuilds)
+                    {
+                        <MudSelectItem Value="@((System.Guid?)guild.Id)">@guild.Name</MudSelectItem>
+                    }
+                </MudSelect>
+
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="AssignToGuild" Disabled="@(!success)">Join Guild</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="6">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Current Memberships</MudText>
+            @if (loading)
+            {
+                <MudProgressCircular Indeterminate="true" />
+            }
+            else
+            {
+                @foreach (var critter in critters)
+                {
+                    <MudCard Class="mb-3">
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle1"><strong>@critter.Name</strong> (@critter.Species)</MudText>
+                            @if (!critter.GuildIds.Any())
+                            {
+                                <MudText Typo="Typo.body2" Color="Color.Secondary">No guild memberships</MudText>
+                            }
+                            else
+                            {
+                                <MudText Typo="Typo.body2">Member of:</MudText>
+                                @foreach (var guildId in critter.GuildIds)
+                                {
+                                    var guild = guilds.FirstOrDefault(g => g.Id == guildId);
+                                    if (guild != null)
+                                    {
+                                        <MudChip T="bool" Color="Color.Primary" Size="Size.Small" OnClose="() => LeaveGuild(critter.Id, guildId)">@guild.Name</MudChip>
+                                    }
+                                }
+                            }
+                        </MudCardContent>
+                    </MudCard>
+                }
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private List<CritterDetails> critters = new();
+    private List<GuildDetails> guilds = new();
+    private List<GuildDetails> availableGuilds = new();
+    private Guid? selectedCritterId;
+    private Guid? selectedGuildId;
+    private bool loading = true;
+    private MudForm form = null!;
+    private bool success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        UpdateAvailableGuilds();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            loading = true;
+            critters = (await QuerySession.Query<CritterDetails>().ToListAsync()).ToList();
+            guilds = (await QuerySession.Query<GuildDetails>().ToListAsync()).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void UpdateAvailableGuilds()
+    {
+        if (selectedCritterId.HasValue)
+        {
+            var critter = critters.FirstOrDefault(c => c.Id == selectedCritterId);
+            if (critter != null)
+            {
+                availableGuilds = guilds.Where(g => !critter.GuildIds.Contains(g.Id)).ToList();
+            }
+        }
+        else
+        {
+            availableGuilds = guilds;
+        }
+    }
+
+    private async Task AssignToGuild()
+    {
+        if (!selectedCritterId.HasValue || !selectedGuildId.HasValue)
+            return;
+
+        try
+        {
+            // Create a command and send it via the message bus
+            var command = new JoinGuildCommand(selectedCritterId.Value, selectedGuildId.Value);
+            await MessageBus.InvokeAsync<JoinedGuild>(command);
+           
+
+            Snackbar.Add("Successfully joined guild!", Severity.Success);
+            selectedCritterId = null;
+            selectedGuildId = null;
+            await form.ResetAsync();
+            await LoadData();
+            UpdateAvailableGuilds();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error joining guild: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LeaveGuild(Guid critterId, Guid guildId)
+    {
+        try
+        {
+            // Create a command to leave the guild
+            // You would need to create this command class
+            var command = new LeaveGuildCommand(critterId, guildId);
+            var result = await MessageBus.InvokeAsync<LeftGuild>(command);
+
+            Snackbar.Add("Successfully left guild!", Severity.Success);
+            await LoadData();
+            UpdateAvailableGuilds();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error leaving guild: {ex.Message}", Severity.Error);
+        }
+    }
+}

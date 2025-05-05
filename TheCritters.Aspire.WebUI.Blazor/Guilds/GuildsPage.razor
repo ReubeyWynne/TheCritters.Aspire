@@ -1,0 +1,104 @@
+﻿@page "/guilds"
+@using TheCritters.Aspire.Application.Guilds.Commands
+@using TheCritters.Aspire.Infrastructure.Projections
+@using Wolverine
+@rendermode InteractiveServer
+@inject IMessageBus MessageBus
+@inject IQuerySession QuerySession
+@inject ISnackbar Snackbar
+
+<PageTitle>Guilds</PageTitle>
+
+<MudText Typo="Typo.h3" Class="mb-4">Guilds</MudText>
+
+<MudGrid>
+    <MudItem xs="12" sm="4">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Create New Guild</MudText>
+            <MudForm @ref="form" @bind-IsValid="@success">
+                <MudTextField T="string" @bind-Value="newGuild.Name" Label="Name" Required="true" RequiredError="Name is required!" />
+                <MudTextField T="string" @bind-Value="newGuild.Description" Label="Description" Required="true" RequiredError="Description is required!" Class="mt-3" />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Class="mt-4" OnClick="CreateGuild" Disabled="@(!success)">Create</MudButton>
+            </MudForm>
+        </MudPaper>
+    </MudItem>
+
+    <MudItem xs="12" sm="8">
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-4">Existing Guilds</MudText>
+            @if (loading)
+            {
+                <MudProgressCircular Indeterminate="true" />
+            }
+            else
+            {
+                <MudTable Items="@guilds" Hover="true" Breakpoint="Breakpoint.Sm">
+                    <HeaderContent>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Created</MudTh>
+                        <MudTh>Allowed Lodges</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">@context.Name</MudTd>
+                        <MudTd DataLabel="Description">@context.Description</MudTd>
+                        <MudTd DataLabel="Created">@context.CreatedAt.ToString("g")</MudTd>
+                        <MudTd DataLabel="Allowed Lodges">@context.AllowedLodges.Count</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private CreateGuildCommand newGuild = new("", "");
+    private IReadOnlyList<GuildDetails> guilds = null!;
+    private bool loading = true;
+    private MudForm form = null!;
+    private bool success;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGuilds();
+    }
+
+    private async Task LoadGuilds()
+    {
+        try
+        {
+            loading = true;
+            guilds = await QuerySession.Query<GuildDetails>().ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading guilds: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task CreateGuild()
+    {
+        try
+        {
+            var result = await MessageBus.InvokeAsync<CreateGuildCommand>(newGuild);
+
+            if(result == null)
+            {
+                Snackbar.Add($"Error creating guild", Severity.Error);
+                return;
+            }
+            Snackbar.Add("Guild created successfully!", Severity.Success);
+            newGuild = new("", "");
+            await form.ResetAsync();
+            await LoadGuilds();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creating guild: {ex.Message}", Severity.Error);
+        }
+    }
+}
