@@ -1,5 +1,5 @@
 ﻿using Marten.Events.Aggregation;
-using static TheCritters.Aspire.Domain.Aggregates.Family.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Family;
 
 namespace TheCritters.Aspire.Infrastructure.Projections;
 
@@ -14,7 +14,7 @@ public class FamilyDetails
 
 public class FamilyDetailsProjection : SingleStreamProjection<FamilyDetails>
 {
-    public static FamilyDetails Create(Established @event)
+    public static FamilyDetails Create(FamilyEstablished @event)
     {
         return new FamilyDetails
         {

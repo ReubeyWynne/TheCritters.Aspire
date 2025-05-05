@@ -1,6 +1,6 @@
 ﻿using Marten.Events;
 using TheCritters.Aspire.Domain.Aggregates;
-using static TheCritters.Aspire.Domain.Aggregates.Lodge.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Lodge;
 
 namespace TheCritters.Aspire.Application.Lodges.Commands;
 
@@ -11,5 +11,5 @@ public static class CloseLodgeCommandAggregateHandler
     public static void Handle(
            CloseLodgeCommand command,
            IEventStream<Lodge> stream) =>
-      stream.AppendOne(new Closed(command.LodgeId, command.Timestamp));
+      stream.AppendOne(new LodgeClosed(command.LodgeId, command.Timestamp));
 }

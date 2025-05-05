@@ -1,5 +1,5 @@
 ﻿using Marten.Events.Aggregation;
-using static TheCritters.Aspire.Domain.Aggregates.Lodge.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Lodge;
 
 namespace TheCritters.Aspire.Infrastructure.Projections;
 
@@ -15,7 +15,7 @@ public class LodgeOccupancy
 
 public class LodgeOccupancyProjection : SingleStreamProjection<LodgeOccupancy>
 {
-    public static LodgeOccupancy Create(Created @event)
+    public static LodgeOccupancy Create(LodgeCreated @event)
     {
         return new LodgeOccupancy
         {
@@ -26,13 +26,13 @@ public class LodgeOccupancyProjection : SingleStreamProjection<LodgeOccupancy>
         };
     }
 
-    public static void Apply(CritterEntered @event, LodgeOccupancy view)
+    public static void Apply(LodgeCritterEntered @event, LodgeOccupancy view)
     {
         view.CurrentOccupancy++;
         view.CurrentOccupants.Add(@event.CritterId);
     }
 
-    public static void Apply(CritterExited @event, LodgeOccupancy view)
+    public static void Apply(LodgeCritterExited @event, LodgeOccupancy view)
     {
         view.CurrentOccupancy = Math.Max(0, view.CurrentOccupancy - 1);
         view.CurrentOccupants.Remove(@event.CritterId);

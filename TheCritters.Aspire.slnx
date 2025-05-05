@@ -4,6 +4,9 @@
     <Project Path="TheCritters.Aspire.AppHost/TheCritters.Aspire.AppHost.csproj" Id="ebd2f28f-d2f1-54b0-3dab-e4b9e83fa38e" />
     <Project Path="TheCritters.Aspire.ServiceDefaults/TheCritters.Aspire.ServiceDefaults.csproj" Id="7f88eaf7-a265-8228-8b99-a6b12677a79b" />
   </Folder>
+  <Folder Name="/docs/" Id="02ea681e-c7d8-13c7-8484-4ac65e1b71e8">
+    <File Path="README.md" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="TheCritters.Aspire.Application/TheCritters.Aspire.Application.csproj" Id="38f61057-a333-a46d-9a4e-4636df5ae35a" />
     <Project Path="TheCritters.Aspire.Domain/TheCritters.Aspire.Domain.csproj" Id="06ee7910-d6d4-cf5d-75f0-91e71c4a50de" />

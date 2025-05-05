@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using static TheCritters.Aspire.Domain.Aggregates.Critter.Events;
 
 namespace TheCritters.Aspire.Domain.Aggregates;
 
@@ -17,14 +16,14 @@ public class Critter
     public DateTimeOffset RegisteredAt { get; private set; }
     public bool IsActive { get; private set; }
 
-    public static Critter Create(Registered @event)
+    public static Critter Create(CritterRegistered @event)
     {
         Critter critter = new();
         critter.Apply(@event);
         return critter;
     }
 
-    public void Apply(Registered @event)
+    public void Apply(CritterRegistered @event)
     {
         Name = @event.Name;
         Species = @event.Species;
@@ -32,38 +31,31 @@ public class Critter
         IsActive = true;
     }
 
-    public void Apply(JoinedGuild @event) => Guilds.Add(@event.GuildId);
+    public void Apply(CritterJoinedGuild @event) => Guilds.Add(@event.GuildId);
 
-    public void Apply(LeftGuild @event) => Guilds.Remove(@event.GuildId);
+    public void Apply(CritterLeftGuild @event) => Guilds.Remove(@event.GuildId);
 
-    public static class Events
-    {
-        public static ImmutableArray<Type> Types =>
-        [
-            typeof(Registered),
-            typeof(JoinedGuild),
-            typeof(LeftGuild)
-        ];
-        public record Registered(
-        Guid Id,
-        string Name,
-        string Species,
-        DateTimeOffset RegisteredAt);
+    public static ImmutableArray<Type> EventTypes =>
+       [
+           typeof(CritterRegistered),
+            typeof(CritterJoinedGuild),
+            typeof(CritterLeftGuild)
+       ];
+    public record CritterRegistered(
+    Guid Id,
+    string Name,
+    string Species,
+    DateTimeOffset RegisteredAt);
 
-        public record JoinedGuild(
-        Guid CritterId,
-        Guid GuildId,
-        DateTimeOffset JoinedAt);
+    public record CritterJoinedGuild(
+    Guid CritterId,
+    Guid GuildId,
+    DateTimeOffset JoinedAt);
 
-        public record LeftGuild(
-        Guid CritterId,
-        Guid GuildId,
-        DateTimeOffset LeftAt);
-
-    }
-
-
-
+    public record CritterLeftGuild(
+    Guid CritterId,
+    Guid GuildId,
+    DateTimeOffset LeftAt);
 
 
 }

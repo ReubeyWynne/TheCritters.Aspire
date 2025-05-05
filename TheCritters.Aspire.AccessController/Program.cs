@@ -3,7 +3,6 @@ using TheCritters.Aspire.AccessController.Services;
 using TheCritters.Aspire.Infrastructure.Persistence;
 using TheCritters.Aspire.ServiceDefaults;
 using Wolverine;
-using Wolverine.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 

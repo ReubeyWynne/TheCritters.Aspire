@@ -27,14 +27,14 @@ public class LodgeAccess
     public bool IsActive => RevokedAt == null;
 
     // Factory method that creates the aggregate AND the initial event
-    public static (LodgeAccess authorisation, Events.AccessGranted @event) Grant(
+    public static (LodgeAccess authorisation, AccessGranted @event) Grant(
         Guid critterId,
         Guid lodgeId,
         AuthorisationSourceType authorisationSource,
         Guid sourceId)
     {
         // Create the event first
-        var @event = new Events.AccessGranted(
+        var @event = new AccessGranted(
             critterId,
             lodgeId,
             authorisationSource,
@@ -49,12 +49,12 @@ public class LodgeAccess
     }
 
     // Method to revoke access that returns the event to be persisted
-    public Events.AccessRevoked Revoke(string reason)
+    public AccessRevoked Revoke(string reason)
     {
         if (RevokedAt.HasValue)
             throw new InvalidOperationException("Access has already been revoked");
 
-        return new Events.AccessRevoked(
+        return new AccessRevoked(
             CritterId,
             LodgeId,
             reason,
@@ -62,7 +62,7 @@ public class LodgeAccess
     }
 
     // Event handlers - these actually modify the aggregate state
-    public void Apply(Events.AccessGranted @event)
+    public void Apply(AccessGranted @event)
     {
         Id = Guid.NewGuid(); // Generate a deterministic ID based on the event data
         CritterId = @event.CritterId;
@@ -72,42 +72,38 @@ public class LodgeAccess
         GrantedAt = @event.GrantedAt;
     }
 
-    public void Apply(Events.AccessRevoked @event)
+    public void Apply(AccessRevoked @event)
     {
         RevokedAt = @event.RevokedAt;
     }
 
 
-    public static class Events
-    {
-
-        public static ImmutableArray<Type> Types =>
+    public static ImmutableArray<Type> EventTypes =>
         [
             typeof(AccessAttempted),
             typeof(AccessRevoked),
             typeof(AccessGranted)
         ];
 
-        public record AccessGranted(
-            Guid CritterId,
-            Guid LodgeId,
-            AuthorisationSourceType AuthorisationSource,
-            Guid SourceId,
-            DateTimeOffset GrantedAt);
+    public record AccessGranted(
+        Guid CritterId,
+        Guid LodgeId,
+        AuthorisationSourceType AuthorisationSource,
+        Guid SourceId,
+        DateTimeOffset GrantedAt);
 
-        public record AccessRevoked(
-            Guid CritterId,
-            Guid LodgeId,
-            string Reason,
-            DateTimeOffset RevokedAt);
+    public record AccessRevoked(
+        Guid CritterId,
+        Guid LodgeId,
+        string Reason,
+        DateTimeOffset RevokedAt);
 
-        public record AccessAttempted(
-            Guid CritterId,
-            Guid LodgeId,
-            DateTimeOffset AttemptedAt,
-            bool WasSuccessful,
-            string? DenialReason = null);
-    }
+    public record AccessAttempted(
+        Guid CritterId,
+        Guid LodgeId,
+        DateTimeOffset AttemptedAt,
+        bool WasSuccessful,
+        string? DenialReason = null);
 }
 
 

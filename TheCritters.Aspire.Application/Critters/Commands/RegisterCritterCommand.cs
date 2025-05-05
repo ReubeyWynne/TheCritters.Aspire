@@ -1,7 +1,7 @@
 ﻿// src/TheCritters.Aspire.Application/Critters/Commands/RegisterCritterCommand.cs
 using Wolverine.Attributes;
 using Wolverine.Marten;
-using static TheCritters.Aspire.Domain.Aggregates.Critter.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Critter;
 using TheCritters.Aspire.Domain.Aggregates;
 
 namespace TheCritters.Aspire.Application.Critters.Commands;
@@ -21,6 +21,6 @@ public static class RegisterCritterCommandHandler
     public static IStartStream Handle(
         RegisterCritterCommand cmd) => 
             MartenOps.StartStream<Critter>(
-                new Registered(
+                new CritterRegistered(
                     Guid.NewGuid(), cmd.Name, cmd.Species, DateTime.UtcNow));
 }

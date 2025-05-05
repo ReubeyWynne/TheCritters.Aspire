@@ -3,7 +3,7 @@
 @using TheCritters.Aspire.Domain.Aggregates
 @using TheCritters.Aspire.Infrastructure.Projections
 @using Wolverine
-@using static TheCritters.Aspire.Domain.Aggregates.Critter.Events
+@using static TheCritters.Aspire.Domain.Aggregates.Critter
 @rendermode InteractiveServer
 @inject IMessageBus MessageBus
 @inject IQuerySession QuerySession
@@ -135,7 +135,7 @@
         {
             // Create a command and send it via the message bus
             var command = new JoinGuildCommand(selectedCritterId.Value, selectedGuildId.Value);
-            await MessageBus.InvokeAsync<JoinedGuild>(command);
+            await MessageBus.InvokeAsync<CritterJoinedGuild>(command);
            
 
             Snackbar.Add("Successfully joined guild!", Severity.Success);
@@ -158,7 +158,7 @@
             // Create a command to leave the guild
             // You would need to create this command class
             var command = new LeaveGuildCommand(critterId, guildId);
-            var result = await MessageBus.InvokeAsync<LeftGuild>(command);
+            var result = await MessageBus.InvokeAsync<CritterLeftGuild>(command);
 
             Snackbar.Add("Successfully left guild!", Severity.Success);
             await LoadData();

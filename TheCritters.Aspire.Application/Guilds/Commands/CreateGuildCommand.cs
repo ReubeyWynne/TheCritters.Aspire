@@ -1,6 +1,6 @@
 ﻿using TheCritters.Aspire.Domain.Aggregates;
 using Wolverine.Marten;
-using static TheCritters.Aspire.Domain.Aggregates.Guild.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Guild;
 
 namespace TheCritters.Aspire.Application.Guilds.Commands;
 
@@ -17,6 +17,6 @@ public static class CreateGuildCommandHandler
     public static IStartStream Handle(
         CreateGuildCommand cmd)
         => MartenOps.StartStream<Guild>(
-            new Created(
+            new GuildCreated(
                 Guid.NewGuid(), cmd.Name, cmd.Description, DateTime.UtcNow));
 }

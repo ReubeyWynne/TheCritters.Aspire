@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using static TheCritters.Aspire.Domain.Aggregates.Lodge.Events;
 
 namespace TheCritters.Aspire.Domain.Aggregates;
 
@@ -24,7 +23,7 @@ public class Lodge
         Location = Location
     };
 
-    public void Apply(Created @event)
+    public void Apply(LodgeCreated @event)
     {
         Name = @event.Name;
         Location = @event.Location;
@@ -33,52 +32,49 @@ public class Lodge
         IsOpen = true;
     }
 
-    public void Apply(CritterEntered @event) => CurrentOccupancy++;
+    public void Apply(LodgeCritterEntered @event) => CurrentOccupancy++;
 
-    public void Apply(CritterExited @event) =>
+    public void Apply(LodgeCritterExited @event) =>
         CurrentOccupancy = Math.Max(0, CurrentOccupancy - 1);
 
-    public void Apply(Opened @event) => IsOpen = true;
+    public void Apply(LodgeOpened @event) => IsOpen = true;
 
-    public void Apply(Closed @event) => IsOpen = false;
+    public void Apply(LodgeClosed @event) => IsOpen = false;
 
-    public static class Events
-    {
-        public static ImmutableArray<Type> Types =>
-        [
-            typeof(Created),
-            typeof(CritterEntered),
-            typeof(CritterExited),
-            typeof(Opened),
-            typeof(Closed)
-        ];
+    public static ImmutableArray<Type> EventTypes =>
+         [
+             typeof(LodgeCreated),
+            typeof(LodgeCritterEntered),
+            typeof(LodgeCritterExited),
+            typeof(LodgeOpened),
+            typeof(LodgeClosed)
+         ];
 
-        public record Created(
-            Guid Id,
-            string Name,
-            string Location,
-            int Capacity,
-            DateTimeOffset CreatedAt);
+    public record LodgeCreated(
+        Guid Id,
+        string Name,
+        string Location,
+        int Capacity,
+        DateTimeOffset CreatedAt);
 
 
-        public record CritterEntered(
-            Guid LodgeId,
-            Guid CritterId,
-            DateTimeOffset EnteredAt);
+    public record LodgeCritterEntered(
+        Guid LodgeId,
+        Guid CritterId,
+        DateTimeOffset EnteredAt);
 
-        public record CritterExited(
-            Guid LodgeId,
-            Guid CritterId,
-            DateTimeOffset ExitedAt);
+    public record LodgeCritterExited(
+        Guid LodgeId,
+        Guid CritterId,
+        DateTimeOffset ExitedAt);
 
-        public record Opened(
-            Guid LodgeId,
-            DateTimeOffset OpenedAt);
+    public record LodgeOpened(
+        Guid LodgeId,
+        DateTimeOffset OpenedAt);
 
-        public record Closed(
-            Guid LodgeId,
-            DateTimeOffset ClosedAt);
-    }
+    public record LodgeClosed(
+        Guid LodgeId,
+        DateTimeOffset ClosedAt);
 
 
 

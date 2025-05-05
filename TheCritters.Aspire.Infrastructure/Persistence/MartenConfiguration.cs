@@ -13,11 +13,11 @@ public static class MartenConfiguration
     public static void ConfigureMarten(StoreOptions options, AutoCreate Create)
     {
         // Configure event sourcing
-        options.Events.AddEventTypes(LodgeAccess.Events.Types);
-        options.Events.AddEventTypes(Critter.Events.Types);
-        options.Events.AddEventTypes(Guild.Events.Types);
-        options.Events.AddEventTypes(Lodge.Events.Types);
-        options.Events.AddEventTypes(Family.Events.Types);
+        options.Events.AddEventTypes(LodgeAccess.EventTypes);
+        options.Events.AddEventTypes(Critter.EventTypes);
+        options.Events.AddEventTypes(Guild.EventTypes);
+        options.Events.AddEventTypes(Lodge.EventTypes);
+        options.Events.AddEventTypes(Family.EventTypes);
 
         // Configure projections
         options.Projections.Add<CritterDetailsProjection>(ProjectionLifecycle.Inline);

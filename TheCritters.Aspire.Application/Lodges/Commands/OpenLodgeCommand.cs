@@ -1,6 +1,6 @@
 ﻿using Marten.Events;
 using TheCritters.Aspire.Domain.Aggregates;
-using static TheCritters.Aspire.Domain.Aggregates.Lodge.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Lodge;
 
 namespace TheCritters.Aspire.Application.Lodges.Commands;
 
@@ -11,5 +11,5 @@ public static class OpenLodgeCommandAggregateHandler
     public static void Handle(
            OpenLodgeCommand command,
            IEventStream<Lodge> stream) =>
-      stream.AppendOne(new Opened(command.LodgeId,  command.Timestamp));
+      stream.AppendOne(new LodgeOpened(command.LodgeId,  command.Timestamp));
 }

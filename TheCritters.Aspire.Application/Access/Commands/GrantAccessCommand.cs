@@ -1,7 +1,6 @@
-﻿using Marten;
-using TheCritters.Aspire.Domain.Access;
+﻿using TheCritters.Aspire.Domain.Access;
 using Wolverine.Marten;
-using static TheCritters.Aspire.Domain.Access.LodgeAccess.Events;
+using static TheCritters.Aspire.Domain.Access.LodgeAccess;
 
 namespace TheCritters.Aspire.Application.Access.Commands;
 

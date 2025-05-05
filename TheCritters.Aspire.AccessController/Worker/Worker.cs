@@ -1,7 +1,7 @@
 ﻿using Marten;
 using Marten.Events;
 using TheCritters.Aspire.Domain.Access;
-using static TheCritters.Aspire.Domain.Access.LodgeAccess.Events;
+using static TheCritters.Aspire.Domain.Access.LodgeAccess;
 
 namespace TheCritters.Aspire.AccessController.Services
 {

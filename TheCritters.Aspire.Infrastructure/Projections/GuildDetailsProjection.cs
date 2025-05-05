@@ -1,5 +1,5 @@
 ﻿using Marten.Events.Aggregation;
-using static TheCritters.Aspire.Domain.Aggregates.Guild.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Guild;
 
 namespace TheCritters.Aspire.Infrastructure.Projections;
 
@@ -14,7 +14,7 @@ public class GuildDetails
 
 public class GuildProjection : SingleStreamProjection<GuildDetails>
 {
-    public static GuildDetails Create(Created @event)
+    public static GuildDetails Create(GuildCreated @event)
     {
         return new GuildDetails
         {
@@ -25,12 +25,12 @@ public class GuildProjection : SingleStreamProjection<GuildDetails>
         };
     }
 
-    public static void Apply(AccessGranted @event, GuildDetails view)
+    public static void Apply(GuildJoinedLodge @event, GuildDetails view)
     {
         view.AllowedLodges.Add(@event.LodgeId);
     }
 
-    public static void Apply(AccessRevoked @event, GuildDetails view)
+    public static void Apply(GuildLeftLodge @event, GuildDetails view)
     {
         view.AllowedLodges.Remove(@event.LodgeId);
     }

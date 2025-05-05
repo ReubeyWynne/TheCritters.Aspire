@@ -2,7 +2,7 @@
 
 using Marten.Events.Aggregation;
 using TheCritters.Aspire.Domain.Access;
-using static TheCritters.Aspire.Domain.Access.LodgeAccess.Events;
+using static TheCritters.Aspire.Domain.Access.LodgeAccess;
 
 namespace TheCritters.Aspire.Infrastructure.Projections;
 

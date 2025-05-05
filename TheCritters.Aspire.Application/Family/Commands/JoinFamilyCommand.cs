@@ -1,7 +1,7 @@
 ﻿using Marten.Events;
 using TheCritters.Aspire.Application.Critters.Commands;
 using TheCritters.Aspire.Domain.Aggregates;
-using static TheCritters.Aspire.Domain.Aggregates.Family.Events;
+using static TheCritters.Aspire.Domain.Aggregates.Family;
 
 namespace TheCritters.Aspire.Application.Family.Commands;
 
@@ -17,5 +17,5 @@ public static class JoinFamilyCommandAggregateHandler
     public static void Handle(
              JoinGuildCommand command,
              IEventStream<Critter> stream) =>
-        stream.AppendOne(new CritterJoined(command.CritterId, command.GuildId, DateTime.UtcNow));
+        stream.AppendOne(new FamilyCritterJoined(command.CritterId, command.GuildId, DateTime.UtcNow));
 }

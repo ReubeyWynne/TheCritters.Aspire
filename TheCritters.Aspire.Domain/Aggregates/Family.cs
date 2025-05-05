@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using static TheCritters.Aspire.Domain.Aggregates.Family.Events;
 
 namespace TheCritters.Aspire.Domain.Aggregates;
 
@@ -15,59 +14,57 @@ public class Family
     public DateTimeOffset EstablishedAt { get; private set; }
     public List<Guid> AssociatedLodges { get; private set; } = [];
     public List<Guid> FamilyIds { get; private set; } = [];
-    public int FamilyCount { get; private set; } 
+    public int FamilyCount { get; private set; }
     public static Family Create(string name, string motto, DateTimeOffset establishedAt) => new()
     {
         Name = name,
         Motto = motto,
         EstablishedAt = establishedAt
     };
-    public void Apply(Established @event)
+    public void Apply(FamilyEstablished @event)
     {
         Name = @event.Name;
         Motto = @event.Motto;
         EstablishedAt = @event.EstablishedAt;
     }
 
-    public void Apply(CritterJoined @event)
+    public void Apply(FamilyCritterJoined @event)
     {
         FamilyCount++;
         FamilyIds.Add(@event.CritterId);
     }
 
-    public void Apply(JoinedLodge @event)
+    public void Apply(FamilyJoinLodge @event)
     {
         AssociatedLodges.Add(@event.LodgeId);
     }
 
-    public void Apply(LeftLodge @event)
+    public void Apply(FamilyLeftLodge @event)
     {
         AssociatedLodges.Remove(@event.LodgeId);
     }
 
-    public static class Events
-    {
-        public static ImmutableArray<Type> Types =>
-        [
-            typeof(Established),
-            typeof(JoinedLodge),
-            typeof(LeftLodge)
-        ];
-        public record Established(
-            Guid Id,
-            string Name,
-            string Motto,
-            DateTimeOffset EstablishedAt);
+    public static ImmutableArray<Type> EventTypes =>
+    [
+        typeof(FamilyEstablished),
+            typeof(FamilyJoinLodge),
+            typeof(FamilyLeftLodge)
+    ];
+    public record FamilyEstablished(
+        Guid Id,
+        string Name,
+        string Motto,
+        DateTimeOffset EstablishedAt);
 
-        public record JoinedLodge(
-            Guid LodgeId);
+    public record FamilyJoinLodge(
+        Guid LodgeId);
 
-        public record LeftLodge(
-            Guid LodgeId);
+    public record FamilyLeftLodge(
+        Guid LodgeId);
 
-        public record CritterJoined(
-            Guid FamilyId,
-            Guid CritterId,
-            DateTimeOffset JoinedAt);
-    }
+    public record FamilyCritterJoined(
+        Guid FamilyId,
+        Guid CritterId,
+        DateTimeOffset JoinedAt);
+
 }

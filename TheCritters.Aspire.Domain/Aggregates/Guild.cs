@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using static TheCritters.Aspire.Domain.Aggregates.Guild.Events;
 
 namespace TheCritters.Aspire.Domain.Aggregates;
 
@@ -23,40 +22,37 @@ public class Guild
         CreatedAt = CreatedAt
     };
 
-    public void Apply(Created @event)
+    public void Apply(GuildCreated @event)
     {
         Name = @event.Name;
         Description = @event.Description;
         CreatedAt = @event.CreatedAt;
     }
 
-    public void Apply(AccessGranted @event) => AllowedLodges.Add(@event.LodgeId);
+    public void Apply(GuildJoinedLodge @event) => AllowedLodges.Add(@event.LodgeId);
 
-    public void Apply(AccessRevoked @event) => AllowedLodges.Remove(@event.LodgeId);
+    public void Apply(GuildLeftLodge @event) => AllowedLodges.Remove(@event.LodgeId);
 
 
-    public static class Events
-    {
-        public static ImmutableArray<Type> Types =>
+    public static ImmutableArray<Type> EventTypes =>
         [
-                typeof(Created),
-                typeof(AccessGranted),
-                typeof(AccessRevoked),
+                typeof(GuildCreated),
+                typeof(GuildJoinedLodge),
+                typeof(GuildLeftLodge),
           ];
-        public record Created(
-            Guid Id,
-            string Name,
-            string Description,
-            DateTimeOffset CreatedAt);
+    public record GuildCreated(
+        Guid Id,
+        string Name,
+        string Description,
+        DateTimeOffset CreatedAt);
 
-        public record AccessGranted(
-            Guid GuildId,
-            Guid LodgeId,
-            DateTimeOffset GrantedAt);
+    public record GuildJoinedLodge(
+        Guid GuildId,
+        Guid LodgeId,
+        DateTimeOffset GrantedAt);
 
-        public record AccessRevoked(
-            Guid GuildId,
-            Guid LodgeId,
-            DateTimeOffset RevokedAt);
-    }
+    public record GuildLeftLodge(
+        Guid GuildId,
+        Guid LodgeId,
+        DateTimeOffset RevokedAt);
 }
