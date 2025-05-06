@@ -1,3 +1,5 @@
+#tl;dr ai garbage below, ill write it up properly sometime...
+
 # CritterStack
 
 CritterStack is a .NET 9 event sourcing application built with .NET Aspire that demonstrates using Marten and Wolverine to implement a domain-driven design system.
