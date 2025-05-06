@@ -12,16 +12,16 @@ public record GrantAccessCommand(
 
 public static class GrantAccessCommandHandler
 {
-    public static (LodgeAccess, IStartStream) Handle(
+    public static IStartStream Handle(
         GrantAccessCommand command)
     {
         // Create a new access authorization
-        var (access, @event) = LodgeAccess.Grant(
+        var (access, @event) = Grant(
             command.CritterId,
             command.LodgeId,
             command.AccessSource,
             command.SourceId);
 
-        return (access, MartenOps.StartStream<AccessGranted>(access.Id, @event));
+        return MartenOps.StartStream<AccessGranted>(access.Id, @event);
     }
 }

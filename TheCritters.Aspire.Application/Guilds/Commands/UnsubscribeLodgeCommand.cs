@@ -5,16 +5,18 @@ using TheCritters.Aspire.Domain.Aggregates;
 using TheCritters.Aspire.Infrastructure.Projections;
 using System.Runtime.CompilerServices;
 using static TheCritters.Aspire.Domain.Aggregates.Guild;
+using Wolverine;
 
 namespace TheCritters.Aspire.Application.Guilds.Commands;
 
 public record UnsubscribeLodgeCommand(
     Guid GuildId,
-    Guid LodgeId);
+    Guid LodgeId,
+    string Reason = "");
 
 public static class UnsubscribeLodgeAggregateHandler
 {
-    public static async IAsyncEnumerable<GrantAccessCommand> Handle(
+    public static async IAsyncEnumerable<RevokeAccessCommand> Handle(
         UnsubscribeLodgeCommand command,
         IEventStream<Guild> stream,
         IDocumentSession session,
@@ -27,14 +29,17 @@ public static class UnsubscribeLodgeAggregateHandler
             .Where(c => c.GuildIds.Contains(command.GuildId))
             .ToListAsync(ct);
 
+        var memberIds = guildMembers.Select(x => x.Id).ToArray();
+        var accessRights = await session
+            .Query<AccessDetails>()
+            .Where(c => c.LodgeId == command.LodgeId && memberIds.Contains(c.CritterId) && c.IsActive)
+            .ToListAsync(token: ct);
 
-        foreach (var critter in guildMembers)
+        foreach (var right in accessRights)
         {
-            yield return new GrantAccessCommand(
-                critter.Id,
-                command.LodgeId,
-                Domain.Access.AuthorisationSourceType.Guild,
-                command.GuildId);
+            yield return new RevokeAccessCommand(
+                right.Id,
+                "Guild unsubscribed from Lodge")
         }
     }
 }

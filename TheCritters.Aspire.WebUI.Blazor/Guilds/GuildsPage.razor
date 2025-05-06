@@ -43,7 +43,7 @@
                         <MudTd DataLabel="Name">@context.Name</MudTd>
                         <MudTd DataLabel="Description">@context.Description</MudTd>
                         <MudTd DataLabel="Created">@context.CreatedAt.ToString("g")</MudTd>
-                        <MudTd DataLabel="Allowed Lodges">@context.AllowedLodges.Count</MudTd>
+                        <MudTd DataLabel="Allowed Lodges">@context.SubscribedLodges.Count</MudTd>
                     </RowTemplate>
                 </MudTable>
             }

@@ -12,7 +12,7 @@ public class Guild
     public Guid Id { get; private set; } = Guid.NewGuid();
     public string Name { get; private set; } = null!;
     public string Description { get; private set; } = null!;
-    public List<Guid> AllowedLodges { get; private set; } = [];
+    public List<Guid> SubscribedLodges { get; private set; } = [];
     public DateTimeOffset CreatedAt { get; private set; }
 
     public static Guild Create(GuildCreated @event)
@@ -29,9 +29,9 @@ public class Guild
         CreatedAt = @event.CreatedAt;
     }
 
-    public void Apply(GuildJoinedLodge @event) => AllowedLodges.Add(@event.LodgeId);
+    public void Apply(GuildJoinedLodge @event) => SubscribedLodges.Add(@event.LodgeId);
 
-    public void Apply(GuildLeftLodge @event) => AllowedLodges.Remove(@event.LodgeId);
+    public void Apply(GuildLeftLodge @event) => SubscribedLodges.Remove(@event.LodgeId);
 
 
     public static ImmutableArray<Type> EventTypes =>

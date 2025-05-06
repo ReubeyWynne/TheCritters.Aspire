@@ -15,7 +15,7 @@ public static class JoinFamilyCommandAggregateHandler
     ///Suffixing the name of the handler class is the same
     ///As the attribute above
     public static void Handle(
-             JoinGuildCommand command,
+             JoinFamilyCommand command,
              IEventStream<Critter> stream) =>
         stream.AppendOne(new FamilyCritterJoined(command.CritterId, command.GuildId, DateTime.UtcNow));
 }

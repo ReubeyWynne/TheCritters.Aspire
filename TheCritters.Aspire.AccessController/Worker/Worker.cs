@@ -29,7 +29,6 @@ namespace TheCritters.Aspire.AccessController.Services
 
             try
             {
-                // Initial fetch of all access authorizations for this lodge
                 var initialAuths = await FetchAccessAuthsAsync();
                 _logger.LogInformation("Initial fetch complete. Found {Count} access authorizations for Lodge {LodgeId}",
                     initialAuths.Count, _lodgeId);
@@ -39,37 +38,31 @@ namespace TheCritters.Aspire.AccessController.Services
                 {
                     try
                     {
-                        // Sleep for 2 minutes
-                        _logger.LogDebug("Worker sleeping for 2 minutes...");
-                        await Task.Delay(TimeSpan.FromMinutes(2), stoppingToken);
+                        _logger.LogInformation("Worker sleeping for 30s...");
+                        await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
 
-                        // Check for new events since last checkpoint
-                        _logger.LogDebug("Checking for new access events since {Checkpoint}", _lastCheckpoint);
+                        _logger.LogInformation("Checking for new access events since {Checkpoint}", _lastCheckpoint);
                         var newEvents = await FetchNewEventsAsync(_lastCheckpoint);
 
                         if (newEvents.Count > 0)
                         {
                             _logger.LogInformation("Found {Count} new access events for Lodge {LodgeId}",
                                 newEvents.Count, _lodgeId);
-                            // Process new events
                             ProcessEvents(newEvents);
                         }
                         else
                         {
-                            _logger.LogDebug("No new access events found for Lodge {LodgeId}", _lodgeId);
+                            _logger.LogInformation("No new access events found for Lodge {LodgeId}", _lodgeId);
                         }
 
-                        // Update checkpoint
                         _lastCheckpoint = DateTimeOffset.UtcNow;
                     }
                     catch (OperationCanceledException)
                     {
-                        // Cancellation requested, break the loop
                         break;
                     }
                     catch (Exception ex)
                     {
-                        // Log the error but continue the worker loop
                         _logger.LogError(ex, "Error occurred while processing access events for Lodge {LodgeId}", _lodgeId);
                     }
                 }
@@ -103,7 +96,7 @@ namespace TheCritters.Aspire.AccessController.Services
 
             // Fetch AccessGranted events
             var grantedEvents = await session.Events.QueryAllRawEvents()
-                .Where(e => e.EventTypesAre(typeof(AccessGranted), typeof(AccessRevoked)))
+                .Where(e => e.EventTypesAre(typeof(AccessGranted), typeof(AccessRevoked)) && e.Timestamp > since)
                 .ToListAsync();
             events.AddRange(grantedEvents.Select(e => e.Data));
 

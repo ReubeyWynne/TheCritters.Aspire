@@ -58,14 +58,14 @@
                             <MudText Typo="Typo.subtitle1"><strong>@guild.Name</strong></MudText>
                             <MudText Typo="Typo.body2">@guild.Description</MudText>
 
-                            @if (!guild.AllowedLodges.Any())
+                            @if (!guild.SubscribedLodges.Any())
                             {
                                 <MudText Typo="Typo.body2" Color="Color.Secondary">No lodge access</MudText>
                             }
                             else
                             {
                                 <MudText Typo="Typo.body2">Has access to:</MudText>
-                                @foreach (var lodgeId in guild.AllowedLodges)
+                                @foreach (var lodgeId in guild.SubscribedLodges)
                                 {
                                     var lodge = lodges.FirstOrDefault(l => l.Id == lodgeId);
                                     if (lodge != null)
@@ -126,7 +126,7 @@
             var guild = guilds.FirstOrDefault(g => g.Id == selectedGuildId);
             if (guild != null)
             {
-                availableLodges = lodges.Where(l => !guild.AllowedLodges.Contains(l.Id)).ToList();
+                availableLodges = lodges.Where(l => !guild.SubscribedLodges.Contains(l.Id)).ToList();
             }
         }
         else
